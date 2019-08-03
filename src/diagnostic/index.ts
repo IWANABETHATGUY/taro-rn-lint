@@ -1,0 +1,111 @@
+import { parse } from '../utils'
+import RNStylesRules from '../RNStyleRules'
+
+import {
+  TextDocument,
+  DiagnosticCollection,
+  Range,
+  Position,
+  DiagnosticSeverity,
+  workspace,
+  Disposable,
+  languages,
+  Diagnostic,
+  window,
+} from 'vscode'
+
+interface RNStyleRule {
+  [prop: string]: {
+    value: string
+    description: string
+    androidOnly: boolean
+    iosOnly: boolean
+  }
+}
+export default class TaroRnLintControler {
+  private _compatibleRN: boolean
+  private _disposable: Disposable
+  private _collection: DiagnosticCollection
+  private _rules: RNStyleRule
+  constructor() {
+    this._compatibleRN = false
+    this._rules = RNStylesRules
+    this._collection = languages.createDiagnosticCollection('taro-rn-lint')
+    let subscriptions: Disposable[] = []
+
+    workspace.onDidSaveTextDocument(
+      textDocument => {
+        this.updateDiagnostics(textDocument)
+      },
+      this,
+      subscriptions,
+    )
+
+    window.onDidChangeActiveTextEditor(
+      editor => {
+        this.updateDiagnostics(editor.document)
+      },
+      this,
+      subscriptions,
+    )
+
+    this._disposable = Disposable.from(...subscriptions)
+  }
+  public changeCompatible(value: boolean) {
+    this._compatibleRN = value
+    if (value) {
+      let document = window.activeTextEditor.document
+      this.updateDiagnostics(document)
+    } else {
+      this._collection.clear()
+    }
+  }
+
+  dispose() {
+    this._disposable.dispose()
+  }
+  private updateDiagnostics(document: TextDocument): void {
+    if (
+      !this._compatibleRN ||
+      !['scss', 'css'].includes(document.languageId) ||
+      !document
+    ) {
+      return
+    }
+    const file: string = document.getText()
+    parse(file).then(res => {
+      const result: Diagnostic[] = []
+      console.time('diagnose');
+      res.root.walkDecls(decl => {
+        if (!this._rules[decl.prop]) {
+          result.push({
+            message: `由于您开启了taro-rn兼容模式，'${decl.prop}'属性 不能使用`,
+            range: new Range(
+              new Position(
+                decl.source.start.line - 1,
+                decl.source.start.column - 1,
+              ),
+              new Position(
+                decl.source.end.line - 1,
+                decl.source.end.column - 1,
+              ),
+            ),
+            severity: DiagnosticSeverity.Error,
+          })
+        } else {
+          
+        }
+      })
+      console.timeEnd('diagnose');
+      //    [
+      //   {
+      //     code: '',
+      //     message: 'cannot assign twice to immutable variable `x`',
+      //     range: new Range(new Position(3, 4), new Position(3, 10)),
+      //     severity: DiagnosticSeverity.Error,
+      //   },
+      // ]
+      this._collection.set(document.uri, result)
+    })
+  }
+}

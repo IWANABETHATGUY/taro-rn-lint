@@ -1,36 +1,48 @@
 {
-    "name": "taro-rn-lint",
-    "displayName": "taro-rn-lint",
-    "description": "",
-    "version": "0.0.1",
-    "engines": {
-        "vscode": "^1.36.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "onCommand:extension.sayHello"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "commands": [{
-            "command": "extension.sayHello",
-            "title": "Hello World"
-        }]
-    },
-    "scripts": {
-        "vscode:prepublish": "yarn run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "yarn run compile && node ./node_modules/vscode/bin/test"
-    },
-    "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.21",
-        "tslint": "^5.8.0",
-        "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42"
-    }
+  "name": "taro-rn-lint",
+  "displayName": "taro-rn-lint",
+  "description": "a lint for taro to be compatible with rn ",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.36.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:scss",
+    "onLanguage:css"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "taroRNLint.open RN compatible mode",
+        "title": "taroRNLint: 打开RN兼容模式"
+      },
+      {
+        "command": "taroRNLint.close RN compatible mode",
+        "title": "taroRNLint: 关闭RN兼容模式"
+      }
+    ]
+  },
+  "main": "./out/extension",
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "yarn run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^8.10.25",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1",
+    "vscode": "^1.1.21"
+  },
+  "dependencies": {
+    "css-to-react-native": "^2.3.1",
+    "postcss": "^7.0.17",
+    "postcss-scss": "^2.0.0"
+  }
 }
