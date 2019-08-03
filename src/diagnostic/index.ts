@@ -1,5 +1,6 @@
 import { parse } from '../utils'
 import RNStylesRules from '../RNStyleRules'
+import cssToRN from 'taro-css-to-react-native'
 
 import {
   TextDocument,
@@ -18,8 +19,8 @@ interface RNStyleRule {
   [prop: string]: {
     value: string
     description: string
-    androidOnly: boolean
-    iosOnly: boolean
+    androidOnly?: boolean
+    iosOnly?: boolean
   }
 }
 export default class TaroRnLintControler {
@@ -75,11 +76,13 @@ export default class TaroRnLintControler {
     const file: string = document.getText()
     parse(file).then(res => {
       const result: Diagnostic[] = []
-      console.time('diagnose');
+      console.time('diagnose')
       res.root.walkDecls(decl => {
-        if (!this._rules[decl.prop]) {
+        const prop = decl.prop;
+        const rule = this._rules[prop];
+        if (!rule) {
           result.push({
-            message: `由于您开启了taro-rn兼容模式，'${decl.prop}'属性 不能使用`,
+            message: `由于您开启了taro-rn兼容模式，'${prop}'属性 不能使用`,
             range: new Range(
               new Position(
                 decl.source.start.line - 1,
@@ -93,10 +96,32 @@ export default class TaroRnLintControler {
             severity: DiagnosticSeverity.Error,
           })
         } else {
-          
+          try {
+            cssToRN(`.foo{${prop}:${decl.value}}`)
+          } catch (err) {
+            console.log(err)
+            result.push({
+              message: `由于您开启了taro-rn兼容模式，'${
+                decl.prop
+              }'属性 取值不能为${decl.value}
+              取值可以为${rule.value},${rule.description}
+              `,
+              range: new Range(
+                new Position(
+                  decl.source.start.line - 1,
+                  decl.source.start.column - 1,
+                ),
+                new Position(
+                  decl.source.end.line - 1,
+                  decl.source.end.column - 1,
+                ),
+              ),
+              severity: DiagnosticSeverity.Error,
+            })
+          }
         }
       })
-      console.timeEnd('diagnose');
+      console.timeEnd('diagnose')
       //    [
       //   {
       //     code: '',

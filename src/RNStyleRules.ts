@@ -513,4 +513,69 @@ export default {
     androidOnly: false,
     iosOnly: true,
   },
+  'align-content': {
+    description:
+      'alignContent controls how rows align in the cross direction, overriding the alignContent of the parent. 访问https://developer.mozilla.org/en-US/docs/Web/CSS/align-content来进一步了解。',
+    value:
+      "enum('flex-start', 'flex-end', 'center', 'stretch', 'space-between', 'space-around')",
+  },
+  'aspect-ratio': {
+    description:
+      '\nOn a node with a set width/height aspect ratio control the size of the unset dimension\nOn a node with a set flex basis aspect ratio controls the size of the node in the cross axis if unset\nOn a node with a measure function aspect ratio works as though the measure function measures the flex basis\nOn a node with flex grow/shrink aspect ratio controls the size of the node in the cross axis if unset\nAspect ratio takes min/max dimensions into account\n',
+    value: 'number',
+  },
+  'border-end-width': {
+    description:
+      'When direction is ltr, borderEndWidth is equivalent to borderRightWidth. When direction is rtl, borderEndWidth is equivalent to borderLeftWidth.',
+    value: 'number',
+  },
+  'border-start-width': {
+    description:
+      'When direction is ltr, borderStartWidth is equivalent to borderLeftWidth. When direction is rtl, borderStartWidth is equivalent to borderRightWidth.',
+    value: 'number',
+  },
+  direction: {
+    description:
+      'direction指定了用户界面的阅读顺序。ltr表示 left to right，即从左往右阅读。反之rtl为从右往左阅读。。默认值为inherit，但根节点的值会根据用户所在地的不同而不同。访问https://yogalayout.com/docs/layout-direction来进一步了解。',
+    value: "enum('inherit', 'ltr', 'rtl')",
+  },
+  display: {
+    description:
+      "它的表现和 CSS 上的display类似，但目前只支持'flex'和'none'两个值。默认值是'flex'。",
+    value: "enum('none', 'flex')",
+  },
+  end: {
+    description: '此样式的优先级高于left和right。',
+    value: 'number, ,string',
+  },
+  'margin-end': {
+    description:
+      'When direction is ltr, marginEnd is equivalent to marginRight. When direction is rtl, marginEnd is equivalent to marginLeft.',
+    value: 'number, ,string',
+  },
+  'margin-start': {
+    description:
+      'When direction is ltr, marginStart is equivalent to marginLeft. When direction is rtl, marginStart is equivalent to marginRight.',
+    value: 'number, ,string',
+  },
+  'padding-end': {
+    description:
+      'When direction is ltr, paddingEnd is equivalent to paddingRight. When direction is rtl, paddingEnd is equivalent to paddingLeft.',
+    value: 'number, ,string',
+  },
+  'padding-start': {
+    description:
+      'When direction is ltr, paddingStart is equivalent to paddingLeft. When direction is rtl, paddingStart is equivalent to paddingRight.',
+    value: 'number, ,string',
+  },
+  start: {
+    description: '此样式的优先级高于left、right和end。',
+    value: 'number, ,string',
+  },
+  'border-bottom-end-radius': { description: '', value: 'number' },
+  'border-bottom-start-radius': { description: '', value: 'number' },
+  'border-end-color': { description: '', value: 'color' },
+  'border-start-color': { description: '', value: 'color' },
+  'border-top-end-radius': { description: '', value: 'number' },
+  'border-top-start-radius': { description: '', value: 'number' },
 }
