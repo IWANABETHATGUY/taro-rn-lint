@@ -68,7 +68,7 @@ export default class TaroRnLintControler {
   private updateDiagnostics(document: TextDocument): void {
     if (
       !this._compatibleRN ||
-      !['scss', 'css'].includes(document.languageId) ||
+      ['scss', 'css'].indexOf(document.languageId) === -1 ||
       !document
     ) {
       return
@@ -122,14 +122,6 @@ export default class TaroRnLintControler {
         }
       })
       console.timeEnd('diagnose')
-      //    [
-      //   {
-      //     code: '',
-      //     message: 'cannot assign twice to immutable variable `x`',
-      //     range: new Range(new Position(3, 4), new Position(3, 10)),
-      //     severity: DiagnosticSeverity.Error,
-      //   },
-      // ]
       this._collection.set(document.uri, result)
     })
   }
