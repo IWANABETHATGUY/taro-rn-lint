@@ -6,4 +6,4 @@
 ### 现在支持以下功能
 1. 对于不支持的属性和取值给出提示。
 2. 可以检测是否使用了组合选择器
-![演示](https://github.com/IWANABETHATGUY/taro-rn-lint/blob/master/images/demo.gif)
+![演示](https://vuethisstore.flatpeach.xyz/taro-rn-lint.gif)
