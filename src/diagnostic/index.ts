@@ -205,8 +205,8 @@ function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
         if (match) {
           result.push(
             new Range(
-              new Position(lineAt + index , match.index),
-              new Position(lineAt + index, match.index + match[0].length),
+              new Position(lineAt + index , match.index + (index === 0 ? columnAt : 0)),
+              new Position(lineAt + index , match.index + match[0].length + (index === 0 ? columnAt : 0)),
             ),
           )
         }
