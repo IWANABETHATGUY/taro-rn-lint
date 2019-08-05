@@ -3,7 +3,7 @@
   "displayName": "taro-rn-lint",
   "publisher": "IWANABETHATGUY",
   "description": "a lint for taro to be compatible with rn ",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "license": "MIT",
   "engines": {
     "vscode": "^1.36.0"
