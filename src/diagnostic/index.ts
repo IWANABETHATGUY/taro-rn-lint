@@ -195,7 +195,7 @@ function LegalRuleHelper(rule: Rule): [boolean, string] {
 function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
   let result: Range[] = []
   // const reg = /[^\s]+(.*?)[^\s]+/
-  const reg = /[^\s]([^{]+)/
+  const reg = /[^\s]([^{]+)|[a-zA-Z]/
   const selector = rule.selector
   const lineAt = rule.source.start.line - 1
   const columnAt = rule.source.start.column - 1
@@ -216,18 +216,6 @@ function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
   }
    else {
     selector.split('\n').forEach((line, index) => {
-      if (selector.indexOf('&') !== -1) {
-        // const fullSelector = selector.replace(/\&/, preRuleSelector)
-        if (isCGS(line)) {
-          const match = line.match(reg)
-          match && result.push(
-            new Range(
-              new Position(lineAt + index , match.index + (index === 0 ? columnAt : 0)),
-              new Position(lineAt + index , match.index + match[0].length + (index === 0 ? columnAt : 0)),
-            ),
-          )
-        }
-      } else {
         const match = line.match(reg)
          match && result.push(
           new Range(
@@ -235,7 +223,6 @@ function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
             new Position(lineAt + index , match.index + match[0].length + (index === 0 ? columnAt : 0)),
           ),
         )
-      }
     })
   }
 
