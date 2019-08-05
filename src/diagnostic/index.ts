@@ -14,7 +14,7 @@ import {
   Diagnostic,
   window,
 } from 'vscode'
-import { Root, Rule, Container } from 'postcss'
+import { Root, Rule, Container, Declaration } from 'postcss'
 
 interface RNStyleRule {
   [prop: string]: {
@@ -25,6 +25,10 @@ interface RNStyleRule {
   }
 }
 
+interface Context {
+  pre: Context | null
+  [prop: string]: string | Context | null
+}
 export default class TaroRnLintControler {
   private _compatibleRN: boolean
   private _disposable: Disposable
@@ -117,12 +121,78 @@ export default class TaroRnLintControler {
   }
 
   private checkPropAndValueError(root: Root, result: Diagnostic[]) {
-    root.walkDecls(decl => {
-      const prop = decl.prop
-      const rule = this._rules[prop]
-      if (!rule) {
+    const contextStack: Context[] = [{ pre: null }]
+    root.walkDecls(/^\$/, decl => {
+      const cctx = contextStack[contextStack.length - 1]
+      if (decl.parent === root) {
+        cctx[decl.prop] = decl.value
+      }
+      // Transform each property declaration here
+    })
+    // Transform CSS AST here
+    root.walkRules(rule => {
+      let cctx: Context = { pre: contextStack[contextStack.length - 1] }
+      contextStack.push(cctx)
+      // Transform each rule here
+      rule.walkDecls(decl => {
+        if (decl.parent !== rule) {
+          return
+        }
+        const prop = decl.prop
+        const value = decl.value
+        const reg = /^\$/
+        if (reg.test(prop)) {
+          cctx[prop] = value
+        } else {
+          const replaceValue = value
+            .split(/\s+/)
+            .map(v => {
+              if (reg.test(v)) {
+                while (cctx) {
+                  if (cctx[v]) {
+                    return cctx[v]
+                  }
+                  cctx = cctx.pre
+                }
+                return 'undefined'
+              }
+              return v
+            })
+            .join(' ')
+          this.DeclWalker(decl, result, prop, replaceValue)
+        }
+      })
+    })
+  }
+
+  private DeclWalker(
+    decl: Declaration,
+    result: Diagnostic[],
+    prop: string,
+    value: string,
+  ): void {
+    const rule = this._rules[prop]
+    if (!rule) {
+      result.push({
+        message: `由于您开启了taro-rn兼容模式，'${prop}'属性 不能使用`,
+        range: new Range(
+          new Position(
+            decl.source.start.line - 1,
+            decl.source.start.column - 1,
+          ),
+          new Position(decl.source.end.line - 1, decl.source.end.column - 1),
+        ),
+        severity: DiagnosticSeverity.Error,
+      })
+    } else {
+      try {
+        cssToRN(`.foo{${prop}:${value}}`)
+      } catch (err) {
+        console.log(err)
         result.push({
-          message: `由于您开启了taro-rn兼容模式，'${prop}'属性 不能使用`,
+          message: `由于您开启了taro-rn兼容模式，'${prop}'属性 取值不能为${value}
+              取值可以为${rule.value},${rule.description}
+              `,
           range: new Range(
             new Position(
               decl.source.start.line - 1,
@@ -132,32 +202,8 @@ export default class TaroRnLintControler {
           ),
           severity: DiagnosticSeverity.Error,
         })
-      } else {
-        try {
-          cssToRN(`.foo{${prop}:${decl.value}}`)
-        } catch (err) {
-          console.log(err)
-          result.push({
-            message: `由于您开启了taro-rn兼容模式，'${
-              decl.prop
-            }'属性 取值不能为${decl.value}
-              取值可以为${rule.value},${rule.description}
-              `,
-            range: new Range(
-              new Position(
-                decl.source.start.line - 1,
-                decl.source.start.column - 1,
-              ),
-              new Position(
-                decl.source.end.line - 1,
-                decl.source.end.column - 1,
-              ),
-            ),
-            severity: DiagnosticSeverity.Error,
-          })
-        }
       }
-    })
+    }
   }
 }
 
@@ -194,7 +240,8 @@ function LegalRuleHelper(rule: Rule): [boolean, string] {
 
 function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
   let result: Range[] = []
-  const reg = /[^\s]+(.*?)[^\s]+/
+  // const reg = /[^\s]+(.*?)[^\s]+/
+  const reg = /[^\s]([^{]+)|[a-zA-Z]/
   const selector = rule.selector
   const lineAt = rule.source.start.line - 1
   const columnAt = rule.source.start.column - 1
@@ -205,36 +252,35 @@ function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
         if (match) {
           result.push(
             new Range(
-              new Position(lineAt + index , match.index),
-              new Position(lineAt + index, match.index + match[0].length),
+              new Position(
+                lineAt + index,
+                match.index + (index === 0 ? columnAt : 0),
+              ),
+              new Position(
+                lineAt + index,
+                match.index + match[0].length + (index === 0 ? columnAt : 0),
+              ),
             ),
           )
         }
       }
     })
-  }
-   else {
+  } else {
     selector.split('\n').forEach((line, index) => {
-      if (selector.indexOf('&') !== -1) {
-        // const fullSelector = selector.replace(/\&/, preRuleSelector)
-        if (isCGS(line)) {
-          const match = line.match(reg)
-          match && result.push(
-            new Range(
-              new Position(lineAt + index , match.index + (index === 0 ? columnAt : 0)),
-              new Position(lineAt + index , match.index + match[0].length + (index === 0 ? columnAt : 0)),
-            ),
-          )
-        }
-      } else {
-        const match = line.match(reg)
-         match && result.push(
+      const match = line.match(reg)
+      match &&
+        result.push(
           new Range(
-            new Position(lineAt + index , match.index + (index === 0 ? columnAt : 0)),
-            new Position(lineAt + index , match.index + match[0].length + (index === 0 ? columnAt : 0)),
+            new Position(
+              lineAt + index,
+              match.index + (index === 0 ? columnAt : 0),
+            ),
+            new Position(
+              lineAt + index,
+              match.index + match[0].length + (index === 0 ? columnAt : 0),
+            ),
           ),
         )
-      }
     })
   }
 

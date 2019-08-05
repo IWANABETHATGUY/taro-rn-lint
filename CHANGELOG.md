@@ -1,9 +1,17 @@
 # Change Log
-All notable changes to the "taro-rn-lint" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## 
-- 0.1.0
-  1. 可手动开启，关闭taro兼容rn模式。
-  2. 检查样式中的属性是否合法，检查样式取值是否合法。
+- 0.2.3 (2019-08-05)
+  - 修复了伪元素组合选择器不能正确检测的bug
+>
+- 0.2.2 (2019-08-05)
+  - 修复了组合选择器lint显示位置错误
+>
+- 0.2.1 (2019-08-04) 
+  - 更新演示demo地址
+> 
+- 0.2.0 (2019-08-04) 
+  - 可以检测是否使用了组合选择器   
+>  
+- 0.1.0 (2019-08-03)
+  - 可手动开启，关闭taro兼容rn模式。
+  - 检查样式中的属性是否合法，检查样式取值是否合法。
