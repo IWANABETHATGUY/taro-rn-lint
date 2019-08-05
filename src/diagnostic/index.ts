@@ -194,7 +194,8 @@ function LegalRuleHelper(rule: Rule): [boolean, string] {
 
 function selectorPositionHelper(rule: Rule, preRuleSelector: string): Range[] {
   let result: Range[] = []
-  const reg = /[^\s]+(.*?)[^\s]+/
+  // const reg = /[^\s]+(.*?)[^\s]+/
+  const reg = /[^\s]([^{]+)/
   const selector = rule.selector
   const lineAt = rule.source.start.line - 1
   const columnAt = rule.source.start.column - 1
